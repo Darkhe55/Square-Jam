@@ -1,0 +1,163 @@
+/* 方块拼盘（Square Jam）—— 棋盘与界面皮肤 */
+
+:root {
+  --sj-ink: #23211c;
+  --sj-soft: #6a6357;
+  --sj-line: #cfc6b4;
+  --sj-board: #fbf8f0;
+  --sj-board-edge: #b9ae98;
+  --sj-bad: #c23b2e;
+  --sj-bad-soft: rgba(194, 59, 46, 0.18);
+  --sj-ok: #1f6f5c;
+  --sj-ok-soft: rgba(31, 111, 92, 0.16);
+  --sj-accent: #c45c26;
+}
+
+/* —— 棋盘 —— */
+.board-svg.sj-board {
+  cursor: crosshair;
+}
+
+.sj-board-bg {
+  fill: var(--sj-board);
+  stroke: var(--sj-board-edge);
+  stroke-width: 2;
+}
+
+.sj-region {
+  stroke: none;
+}
+
+.sj-grid {
+  fill: none;
+  stroke: rgba(150, 140, 120, 0.28);
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+.sj-border {
+  fill: none;
+  stroke: #3c372d;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.sj-size {
+  fill: rgba(70, 64, 52, 0.45);
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 600;
+  text-anchor: end;
+  dominant-baseline: auto;
+  pointer-events: none;
+}
+
+.sj-empty-dot {
+  fill: rgba(120, 110, 92, 0.35);
+  pointer-events: none;
+}
+
+.sj-cell-bad {
+  fill: var(--sj-bad-soft);
+  pointer-events: none;
+}
+
+.sj-cell-tatami {
+  fill: rgba(194, 59, 46, 0.1);
+  stroke: rgba(194, 59, 46, 0.4);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  pointer-events: none;
+}
+
+.sj-clue {
+  fill: var(--sj-ink);
+  font-family: var(--font);
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+.sj-clue.open {
+  fill: #3a352c;
+}
+
+.sj-clue.satisfied {
+  fill: rgba(70, 64, 52, 0.55);
+}
+
+.sj-clue.bad {
+  fill: var(--sj-bad);
+}
+
+.sj-tatami circle {
+  fill: rgba(194, 59, 46, 0.12);
+  stroke: var(--sj-bad);
+  stroke-width: 2;
+}
+
+.sj-tatami path {
+  stroke: var(--sj-bad);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  fill: none;
+}
+
+/* —— 拖拽预览 —— */
+.sj-preview {
+  fill: rgba(31, 111, 92, 0.14);
+  stroke: var(--sj-ok);
+  stroke-width: 2.4;
+  pointer-events: none;
+}
+
+.sj-preview.invalid {
+  fill: rgba(194, 59, 46, 0.14);
+  stroke: var(--sj-bad);
+}
+
+.sj-preview.remove {
+  fill: rgba(196, 92, 38, 0.12);
+  stroke: var(--sj-accent);
+}
+
+.sj-preview-corner {
+  fill: var(--sj-ok);
+  stroke: #fff;
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+.sj-preview.invalid + .sj-preview-corner,
+.sj-preview.invalid ~ .sj-preview-corner {
+  fill: var(--sj-bad);
+}
+
+/* —— 键盘光标 —— */
+.sj-cursor {
+  fill: var(--sj-ok-soft);
+  stroke: var(--sj-ok);
+  stroke-width: 2.2;
+  stroke-dasharray: 5 4;
+  pointer-events: none;
+}
+
+/* —— 回放/落子闪光（模板 fx 会加 fx-glow，这里补一点颜色） —— */
+.sj-region.fx-glow {
+  filter: drop-shadow(0 0 10px rgba(31, 111, 92, 0.7));
+}
+
+/* —— 自定义题板：数字格配色（10–20 稍深一点） —— */
+.custom-cell.sj-clue-val {
+  background: #fffdf6;
+  color: #2a2722;
+}
+
+/* —— 侧边提示补充 —— */
+.status.solving {
+  background: #e7eef8;
+  color: #274b7a;
+}

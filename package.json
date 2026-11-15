@@ -1,0 +1,28 @@
+{
+  "name": "square-jam-puzzle",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "方块拼盘（Square Jam）逻辑谜题：把棋盘划分为正方形，数字表示边长，禁止四条区域边界在同一点相交。",
+  "puzzle": {
+    "port": 5219,
+    "comment": "dev server 端口（vite.config.ts / scripts/dev.mjs / scripts/ui-check.mjs 都读这里，是唯一来源）"
+  },
+  "scripts": {
+    "dev": "vite",
+    "start": "node scripts/dev.mjs",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "gen": "node scripts/gen-puzzles.mjs",
+    "check": "node scripts/check.mjs",
+    "ui-check": "node scripts/ui-check.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.64.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.6"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true
+  }
+}
