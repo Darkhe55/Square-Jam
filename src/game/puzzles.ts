@@ -10,6 +10,7 @@
  */
 
 import { RAW_PUZZLES } from './puzzles-data.ts'
+import { IMPORTED_PUZZLES } from './imported-puzzles.ts'
 import {
   asSquarePuzzle,
   decodeClues,
@@ -20,10 +21,13 @@ import {
 } from './types.ts'
 import { validate } from './validate.ts'
 
+/** 内置题库 + 图片导入题库（imported-puzzles.ts，不会被 npm run gen 覆盖） */
+const ALL_RAW = [...RAW_PUZZLES, ...IMPORTED_PUZZLES]
+
 export const builtinPuzzles: SquarePuzzle[] = []
 const referenceRegions = new Map<string, SquareRect[]>()
 
-for (const raw of RAW_PUZZLES) {
+for (const raw of ALL_RAW) {
   const size = raw.width * raw.height
   if (size <= 0 || raw.width <= 0 || raw.height <= 0) {
     console.warn(`[方块拼盘] 题目尺寸非法：${raw.id}`)

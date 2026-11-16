@@ -15,7 +15,8 @@
     "preview": "vite preview",
     "gen": "node scripts/gen-puzzles.mjs",
     "check": "node scripts/check.mjs",
-    "ui-check": "node scripts/ui-check.mjs"
+    "ui-check": "node scripts/ui-check.mjs",
+    "import-image": "node scripts/import-image.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.64.1",

@@ -93,9 +93,11 @@ src/
     interaction.ts              鼠标拖拽 / 键盘绘制
     puzzles.ts                  题库加载
     puzzles-data.ts             自动生成的内置题库
+    imported-puzzles.ts         图片导入的题目（npm run gen 不会覆盖）
     square.css                  游戏皮肤
 scripts/
   gen-puzzles.mjs               写入 puzzles-data.ts
+  import-image.mjs              图片识图导入题库
   gen-config.mjs                随机出题器（tatami + 唯一解 + 逻辑校验）
   check.mjs                     题库深度审计（Node 直接 import .ts）
   ui-check.mjs                  Playwright + Edge 浏览器实测
@@ -103,6 +105,35 @@ scripts/
 ```
 
 `scripts/check.mjs` 用 Node 24 直接 `import` 浏览器里的同一套 `.ts` 游戏代码，因此审计规则与实际游戏完全一致，不维护第二份规则实现。
+
+## 从图片导入题库（识图）
+
+`scripts/import-image.mjs` 用 Playwright + Edge 全自动识别方块拼盘题面图片（每格数字线索 1–20），
+默认**只预览**，加 `--append` 才写入 `src/game/imported-puzzles.ts`（该文件不会被 `npm run gen` 覆盖）。
+
+```bash
+npm run import-image -- board.png                 # 预览识别结果
+npm run import-image -- board.png --verify        # 预览 + 唯一解校验 + 参考解
+npm run import-image -- board.png --append        # 写入题库
+npm run import-image -- board.png --append --verify --name "识图 · 8×8"
+```
+
+识别流程：按页面底色裁出题板，用「格子底色比格线亮」的亮度投影找等距格线并自动判定 W×H
+（截图与印刷风格图片都适用）→ 每格中心裁切 + 自适应二值化 + 多字体模板匹配识别数字；
+字形明显偏宽时按中间墨迹最少的竖线拆成两个数字（支持 10–20 两位数）。
+
+常用参数：
+
+| 参数 | 说明 |
+|------|------|
+| `--width W` / `--height H` | 手动指定网格尺寸（自动判定失败时） |
+| `--map "x,y=数字,..."` | 人工修正某格线索，坐标 0 基（列,行），`0` = 无数字 |
+| `--ink-drop N` | 数字墨迹相对格子底色的亮度差阈值（默认 60） |
+| `--crop "x,y,w,h"` | 只识别图片中的这块区域（截图带页面边框时用） |
+| `--json out.json` | 导出识别结果（board / solution / 是否唯一） |
+| `--verify` | 调项目 solver 检查唯一解并求参考解（超时只告警） |
+| `--append` | 写入 `src/game/imported-puzzles.ts`（配合 `--dry` 可只演练不写） |
+| `--dry` | 不写入 |
 
 ## 命令
 
@@ -113,6 +144,7 @@ npm run build     # tsc --noEmit + vite build
 npm run gen       # 重新生成内置题库（随机出题 + 唯一解/逻辑校验）
 npm run check     # 题库深度审计（唯一解 / 参考解 / 逻辑推完 / 回放 / 编解码 / 交互几何）
 npm run ui-check  # Playwright(Edge) 浏览器实测，截图输出到 output/
+npm run import-image -- <图片> [--append] [--verify]  # 图片导入题库
 ```
 
 ### 浏览器实测（Playwright + Edge）
