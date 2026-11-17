@@ -3,7 +3,7 @@
  *
  * 只用「必然结论」推进，不猜：
  *   R1 数字线索唯一定位：某数字格所有可能的正方形位置里只剩一个 → 该正方形必在解中；
- *   R2 唯一可覆盖格：行优先第一个未覆盖格的所有可行边长里只剩一种 → 该正方形必在解中；
+ *   R2 覆盖传播：任一未覆盖格的所有可行正方形里只剩一种 → 该正方形必在解中；
  *   R3 反证：对第一个未覆盖格逐一试放每个可行边长，只有一种能继续求解 → 它必在解中；
  *   R4 回溯补完：规则推不动时用求解器补齐（回放标注「回溯补完」）。
  *
@@ -25,6 +25,7 @@ import {
   placeRect,
   placementAllowed,
   squareFits,
+  squaresContainingCell,
   squaresOfSizeContaining,
 } from './partition.ts'
 import { searchSolutions } from './solver.ts'
@@ -49,6 +50,7 @@ function emptyPlan(puzzleId: string): LogicPlan {
 }
 
 export function planLogicSolve(puzzle: Puzzle, initialState: GameState): LogicPlan {
+  const stats: Record<string, number> = { probeCalls: 0, probeNodes: 0, searchNodes: 0 }
   const p = asSquarePuzzle(puzzle)
   const s = asSquareState(initialState)
   const w = s.width
@@ -114,27 +116,51 @@ export function planLogicSolve(puzzle: Puzzle, initialState: GameState): LogicPl
     }
     if (placedByClue) continue
 
-    // R2：第一个未覆盖格只剩一种可行边长
+    // R2：覆盖传播 —— 任一未覆盖格若只剩一种可行正方形，该正方形必在解中
+    //（比只看「第一个未覆盖格」强：任何未覆盖格都必须被某个正方形覆盖）
+    let bestRect: SquareRect | null = null
+    for (let i = 0; i < size; i++) {
+      if (owner[i]! >= 0) continue
+      const x = i % w
+      const y = (i / w) | 0
+      let found: SquareRect | null = null
+      let count = 0
+      for (const cand of squaresContainingCell(w, h, x, y)) {
+        if (!canPlace(cand)) continue
+        count++
+        found = cand
+        if (count > 1) break
+      }
+      if (count === 0) return emptyPlan(p.id)
+      if (count === 1 && found) {
+        bestRect = found
+        break
+      }
+    }
+    if (bestRect) {
+      emit(bestRect, RULE_CELL)
+      continue
+    }
+
+    // 第一个未覆盖格（行优先）必定是所属正方形的左上角，用于 R3 试放
     const cell = firstUncovered(owner)
-    const x = cell % w
-    const y = (cell / w) | 0
-    const maxSide = Math.min(w - x, h - y)
+    const cx = cell % w
+    const cy = (cell / w) | 0
+    const maxSide = Math.min(w - cx, h - cy)
     const cands: SquareRect[] = []
     for (let side = 1; side <= maxSide; side++) {
-      const rect = { x, y, size: side }
+      const rect = { x: cx, y: cy, size: side }
       if (canPlace(rect)) cands.push(rect)
     }
     if (!cands.length) return emptyPlan(p.id)
-    if (cands.length === 1) {
-      emit(cands[0]!, RULE_CELL)
-      continue
-    }
 
     // R3：反证 —— 逐一试放，只有一种能继续求解
     const feasible: SquareRect[] = []
     let probeTimedOut = false
     for (const cand of cands) {
+      stats.probeCalls++
       const out = searchSolutions(clues, w, h, [...placed, cand], 1, PROBE_NODES)
+      stats.probeNodes += out.nodes
       if (out.timedOut) probeTimedOut = true
       else if (out.solutions.length) feasible.push(cand)
     }
@@ -149,6 +175,7 @@ export function planLogicSolve(puzzle: Puzzle, initialState: GameState): LogicPl
   if (firstUncovered(owner) >= 0) {
     saturated = false
     const out = searchSolutions(clues, w, h, placed, 1, 1_500_000)
+    stats.searchNodes = out.nodes
     if (!out.solutions.length) {
       // 规则已推出的部分结论仍然有效；若一组解都找不到，说明盘面本身矛盾
       return emptyPlan(p.id)
@@ -176,6 +203,7 @@ export function planLogicSolve(puzzle: Puzzle, initialState: GameState): LogicPl
     finalState,
     ruleSteps: frames.length,
     saturated,
+    stats,
   }
 }
 

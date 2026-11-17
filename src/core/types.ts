@@ -65,6 +65,8 @@ export interface LogicPlan {
   ruleSteps: number
   /** 是否已推到规则不动点 */
   saturated: boolean
+  /** 推理诊断计数（规则命中 / 反证 / 搜索节点，审计脚本与 check 用） */
+  stats?: Record<string, number>
 }
 
 /** 回溯求解结果 */

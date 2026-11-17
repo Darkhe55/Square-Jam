@@ -182,9 +182,11 @@ for (const p of builtinPuzzles) {
     if (solved.solutions !== 1) fail(`${tag} solvePuzzle 报告解数 ${solved.solutions}（应为 1）`)
   }
 
+  const st = plan.stats ?? {}
   ok(
     `${tag} 数字 ${clueCount} · 区域 ${ref.regions.length} · 唯一解 · ` +
-      `逻辑可推满（规则1/2/3 = ${ruleCount[1]}/${ruleCount[2]}/${ruleCount[3]}）· ${counted.nodes} 节点`,
+      `逻辑可推满（规则1/2/3 = ${ruleCount[1]}/${ruleCount[2]}/${ruleCount[3]}）· ${counted.nodes} 节点` +
+      `（试放 ${st.probeCalls ?? 0} 次 / 试放搜索 ${st.probeNodes ?? 0} 节点 / 回溯 ${st.searchNodes ?? 0} 节点）`,
   )
 }
 
